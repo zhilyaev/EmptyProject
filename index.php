@@ -21,7 +21,19 @@
 	$file = "api/data.json";
 	if(!file_exists($file)){
 		$json = file_get_contents('http://sknt.ru/job/frontend/data.json');
-		file_put_contents($file, $json);
+		$custom = json_decode($json);
+		// Custom moneyRange property
+		foreach ($custom->tarifs as $plan){
+			$min = 5000; // Ну вы звери будете если выше поднимете (цены)
+			$max = 0;
+			foreach ($plan->tarifs as $v){
+				$range = $v->price / $v->pay_period;
+				$max = ($range > $max) ? $range : $max;
+				$min = ($range < $min) ? $range : $min;
+			}
+			$plan->moneyRange = $min." - ".$max;
+		}
+		file_put_contents($file, json_encode($custom));
 	}
 	?>
 </header>
@@ -52,7 +64,7 @@
 
 				<div class="row d-flex">
 					<div class="col-10">
-						<b>350 - 480 Р/мес</b>
+						<b>{{ plan.moneyRange }} Р/мес</b>
 						<ul>
 							<li v-for="option in plan.free_options">{{option}}</li>
 						</ul>
@@ -84,14 +96,6 @@
     let app; // Для управления из консоли
     $.getJSON( "api/data.json", function( json ) {
 	    let plans = json.tarifs;
-	    /*for(let i=0;i<plans.length;i++){
-	        //find max and min => O(n^2)
-		    let subPlan = plans[i].tarifs;
-		    let max, min = 0;
-	        for(let j=0;j<subPlan.length;j++){
-	            if(subPlan.price/pay)
-	        }
-	    }*/
         const index = {
             template : "#step1",
             props: ['plans']
