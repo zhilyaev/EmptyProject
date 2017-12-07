@@ -44,18 +44,31 @@
 <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
 <script type="text/x-template" id="step1">
 	<div class="row justify-content-end d-flex">
-		<div v-for="plan in plans" class="card col col-12 col-sm-12 col-md-6 col-lg-4">
+		<div v-for="(plan, index) in plans" class="card col col-12 col-sm-12 col-md-6 col-lg-4">
 			<h4 class="card-header">Тариф "{{plan.title}}"
 				<span class="badge badge-success">{{plan.speed}} Мбит/с</span>
 			</h4>
 			<div class="card-body">
-				<b>350 - 480 Р/мес</b>
-				<i class="material-icons float-right">play_arrow</i>
-				<ul>
-					<li v-for="option in plan.free_options">{{option}}</li>
-				</ul>
-				<hr>
-				<a href="http://www.sknt.ru/tarifi_internet/in/1.htm">Узнать подробнее на сайте</a>
+
+				<div class="row d-flex">
+					<div class="col-10">
+						<b>350 - 480 Р/мес</b>
+						<ul>
+							<li v-for="option in plan.free_options">{{option}}</li>
+						</ul>
+					</div>
+					<div class="col-2 align-self-center">
+						<a :href="'#/'+index" class="btn btn-outline-primary">
+							<i class="material-icons">play_arrow</i>
+						</a>
+					</div>
+				</div>
+
+
+
+			</div>
+			<div class="card-footer">
+				<a :href="plan.link">Узнать подробнее на сайте</a>
 			</div>
 		</div>
 	</div>
@@ -71,6 +84,14 @@
     let app; // Для управления из консоли
     $.getJSON( "api/data.json", function( json ) {
 	    let plans = json.tarifs;
+	    /*for(let i=0;i<plans.length;i++){
+	        //find max and min => O(n^2)
+		    let subPlan = plans[i].tarifs;
+		    let max, min = 0;
+	        for(let j=0;j<subPlan.length;j++){
+	            if(subPlan.price/pay)
+	        }
+	    }*/
         const index = {
             template : "#step1",
             props: ['plans']
