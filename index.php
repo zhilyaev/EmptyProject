@@ -26,7 +26,7 @@
 	?>
 </header>
 <section class="container" id="app" >
-		<router-view class="justify-content-end d-flex"></router-view>
+	<router-view></router-view>
 </section>
 <hr>
 <footer class="container">
@@ -40,58 +40,65 @@
     </div>
 </footer>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-<!--
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
--->
 <script src="https://unpkg.com/vue"></script>
 <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+<script type="text/x-template" id="step1">
+	<div class="row justify-content-end d-flex">
+		<div v-for="plan in plans" class="card col col-12 col-sm-12 col-md-6 col-lg-4">
+			<h4 class="card-header">Тариф "{{plan.title}}"
+				<span class="badge badge-success">{{plan.speed}} Мбит/с</span>
+			</h4>
+			<div class="card-body">
+				<b>350 - 480 Р/мес</b>
+				<i class="material-icons float-right">play_arrow</i>
+				<ul>
+					<li v-for="option in plan.free_options">{{option}}</li>
+				</ul>
+				<hr>
+				<a href="http://www.sknt.ru/tarifi_internet/in/1.htm">Узнать подробнее на сайте</a>
+			</div>
+		</div>
+	</div>
+</script>
+<script type="text/x-template" id="step2">
+	<h1>Шаг2 </h1>
+</script>
+<script type="text/x-template" id="step3">
+	<h1>Шаг3 {{ message }}</h1>
+</script>
 <script>
 	/* smth like func main */
     let app; // Для управления из консоли
     $.getJSON( "api/data.json", function( json ) {
 	    let plans = json.tarifs;
-        let htmlMain = "<div class=\"row\" >"; // !undefined
-        /* Building html */
-        for(let i=0;i<plans.length;i++){
-			//console.log(plans[i])
-	        if (plans[i].free_options===undefined){
-                plans[i].free_options='Просто интернет'
-	        }else{
-                plans[i].free_options = plans[i].free_options.join("</li><li>")
-	        }
-	        htmlMain+="<div class=\"card col col-12 col-sm-12 col-md-6 col-lg-4\">" +
-                "<h4 class=\"card-header\">Тариф \""+plans[i].title+"\" <span class=\"badge badge-success\">"+plans[i].speed+" Мбит/с</span></h4>" +
-                "<div class=\"card-body\">" +
-                "<b>350 - 480 Р/мес</b>\n" +
-                "<i class=\"material-icons float-right\">play_arrow</i>" +
-                "<ul><li>"+plans[i].free_options+"</li></ul>" +
-                "<hr>" +
-                "<a href='"+plans[i].link+"'>Узнать подробнее на сайте</a>" +
-                "</div>" +
-                "</div>";
-
-
-        }
-        htmlMain+="</div>";
-        //console.log(htmlMain)
-	    //document.getElementById("app").innerHTML=htmlMain;
-
         const index = {
-            template : htmlMain
+            template : "#step1",
+            props: ['plans']
         };
 
-        const router = new VueRouter({
+        const tarif = {
+            template : "#step2",
+           // props: ['plans']
+        };
+
+        const pay = {
+            template : "#step3",
+            props: ['message']
+        };
+
+        const vueRouter = new VueRouter({
             routes: [
-	            { path:"/index", component:index}
+                { path:"/", component:index, props:{plans:plans} },
+                { path:"/:id", component:tarif },
+                { path:"/:id/pay", component:pay,  props: {message:'Пари',default:true} }
             ]
         });
 
 	    app = new Vue({
-            router: router,
-	        data: {
-                plans
-            }
-        }).$mount('#app')
+		    el:"#app",
+            router: vueRouter ,
+	        data: {plans}
+        })
 
     });
 </script>
