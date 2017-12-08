@@ -89,7 +89,12 @@
 <!-- STEP 2 -->
 <script type="text/x-template" id="step2">
 	<section>
-		<h2 class="text-center">{{plans[$route.params.id].title}}</h2>
+		<h2 class="text-center">
+			<button onclick="history.back();" class="btn btn-outline-secondary">
+				<i class="material-icons">keyboard_arrow_left</i>
+			</button>
+			{{plans[$route.params.id].title}}
+		</h2>
 		<div class="row justify-content-center d-flex">
 			<div v-for="(plan, index) in plans[$route.params.id].tarifs" class="col col-12 col-sm-12 col-md-6 col-lg-4">
 				<div class="card">
@@ -110,14 +115,23 @@
 <!-- STEP 3 -->
 <script type="text/x-template" id="step3">
 	<section>
-		<h2 class="text-center">Выбор тарифа</h2>
+		<h2 class="text-center">
+			<button onclick="history.back();" class="btn btn-outline-secondary">
+				<i class="material-icons">keyboard_arrow_left</i>
+			</button>
+			Выбор тарифа
+		</h2>
 		<div class="row justify-content-center d-flex">
 			<div class="col col-12 col-sm-12 col-md-6 col-lg-4">
 				<div class="card">
 					<h4 class="card-header">{{plan.title}}</h4>
 					<ul class="list-group list-group-flush">
-						<li class="list-group-item"><b>-{{ plan.price / plan.pay_period }} ₽/мес</b></li>
+						<li class="list-group-item">Период оплаты — <b>{{plan.pay_period}}</b> мес.</li>
+						<li class="list-group-item">В среднем — <b>{{ plan.price / plan.pay_period }} ₽/мес</b></li>
 						<li class="list-group-item">Разовый платеж — <b> {{ plan.price }} ₽</b></li>
+						<li class="list-group-item">Со счета спишется — <b> {{ plan.price }} ₽</b></li>
+						<li class="list-group-item">Вступит в силу — <b> сегодня </b></li>
+						<li class="list-group-item">Активно до — <b>{{new Date(new Date().setMonth(+(plan.pay_period)+today.getMonth())).ddmmyyyy() }}</b></li>
 						<li v-if="plan.discount>0" class="list-group-item">Скидка — <b> {{ plan.discount }} ₽</b></li>
 					</ul>
 					<a href="#" class="btn btn-outline-primary">
@@ -129,6 +143,18 @@
 	</section>
 </script>
 <script>
+    Date.prototype.ddmmyyyy = function (literal) {
+        literal = (literal===undefined) ? '.' : literal;
+        let mm = this.getMonth() + 1; // getMonth() is zero-based
+        let dd = this.getDate();
+
+        return [
+            (dd>9 ? '' : '0') + dd,
+            (mm>9 ? '' : '0') + mm,
+            this.getFullYear()
+        ].join(literal);
+    };
+
 	/* smth like func main */
     $.getJSON( "api/data.json", function( json ) {
 	    let plans = json.tarifs;
@@ -144,7 +170,7 @@
 
         const step3 = {
             template : "#step3",
-            props: ['plan']
+            props: ['plan','today']
         };
 
         const vueRouter = new VueRouter({
@@ -154,12 +180,12 @@
                 {
                     path:"/:id/:i",
 	                component:step3,
-	                props: (route) => ({ plan: plans[route.params.id].tarifs[route.params.i] })
+	                props: (route) => ({ plan: plans[route.params.id].tarifs[route.params.i], today: new Date() })
                 }
             ]
         });
 
-	    const = app = new Vue({
+	    const app = new Vue({
 		    el:"#app",
             router: vueRouter
         })
