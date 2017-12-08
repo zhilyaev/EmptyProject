@@ -3,3 +3,7 @@
     display: inline-flex;
     vertical-align: middle;
 }
+
+.d-flex .card {
+    margin-top: 10px;
+}

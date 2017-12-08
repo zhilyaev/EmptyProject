@@ -7,6 +7,7 @@
     <meta name="author" content="Дмитрий Жиляев">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<link rel="icon" href="favicon/favicon.ico">
     <!-- CSS -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="css/bootstrap.css">
@@ -26,6 +27,8 @@
 		foreach ($custom->tarifs as $plan){
 			$min = 5000; // Ну вы звери будете если выше поднимете (цены)
 			$max = 0;
+			// JSON файл не однородный (Земля
+			// поэтому придется искать
 			foreach ($plan->tarifs as $v){
 				$range = $v->price / $v->pay_period;
 				$max = ($range > $max) ? $range : $max;
@@ -54,42 +57,57 @@
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://unpkg.com/vue"></script>
 <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+<!-- STEP 1 -->
 <script type="text/x-template" id="step1">
-	<div class="row justify-content-end d-flex">
-		<div v-for="(plan, index) in plans" class="card col col-12 col-sm-12 col-md-6 col-lg-4">
-			<h4 class="card-header">Тариф "{{plan.title}}"
-				<span class="badge badge-success">{{plan.speed}} Мбит/с</span>
-			</h4>
-			<div class="card-body">
-
-				<div class="row d-flex">
-					<div class="col-10">
-						<b>{{ plan.moneyRange }} Р/мес</b>
-						<ul>
-							<li v-for="option in plan.free_options">{{option}}</li>
-						</ul>
-					</div>
-					<div class="col-2 align-self-center">
-						<a :href="'#/'+index" class="btn btn-outline-primary">
-							<i class="material-icons">play_arrow</i>
-						</a>
-					</div>
+	<div class="row justify-content-center d-flex">
+		<div v-for="(plan, index) in plans" style="width: 100% !important;" class="align-content-stretch d-flex col col-12 col-sm-12 col-md-6 col-lg-4">
+			<div class="card">
+				<h4 class="card-header">Тариф "{{plan.title}}"
+					<span class="badge badge-success">{{plan.speed}} Мбит/с</span>
+				</h4>
+				<div class="card-body">
+					<b>{{ plan.moneyRange }} ₽/мес</b>
+					<ul>
+						<li v-for="option in plan.free_options">{{option}}</li>
+					</ul>
 				</div>
-
-
-
-			</div>
-			<div class="card-footer">
-				<a :href="plan.link">Узнать подробнее на сайте</a>
+				<a :href="'#/'+index" class="btn btn-outline-primary btn-block">
+					<i class="material-icons">play_arrow</i>
+				</a>
+				<div class="card-footer text-center">
+					<a :href="plan.link">
+						<i style="font-size: 15px;" class="material-icons">help</i>
+						Узнать подробнее на сайте
+					</a>
+				</div>
 			</div>
 		</div>
 	</div>
 </script>
+<!-- STEP 2 -->
 <script type="text/x-template" id="step2">
-	<h1>Шаг2 </h1>
+	<section>
+		<h2 class="text-center">{{plans[$route.params.id].title}}</h2>
+		<div class="row justify-content-center d-flex">
+			<div v-for="(plan, index) in plans[$route.params.id].tarifs" class="col col-12 col-sm-12 col-md-6 col-lg-4">
+				<div class="card">
+					<h4 class="card-header">{{plan.title}}</h4>
+					<ul class="list-group list-group-flush">
+						<li class="list-group-item"><b>-{{ plan.price / plan.pay_period }} ₽/мес</b></li>
+						<li class="list-group-item">Разовый платеж — <b> {{ plan.price }} ₽</b></li>
+						<li class="list-group-item">Скидка —  <b> {{ plan.price }} ₽</b></li>
+					</ul>
+					<a :href="'#/'+$route.params.id+'/'+index" class="btn btn-outline-primary">
+						<i class="material-icons">play_arrow</i>
+					</a>
+				</div>
+			</div>
+		</div>
+	</section>
 </script>
+<!-- STEP 3 -->
 <script type="text/x-template" id="step3">
-	<h1>Шаг3 {{ message }}</h1>
+	<h1>Шаг3</h1>
 </script>
 <script>
 	/* smth like func main */
@@ -103,26 +121,24 @@
 
         const tarif = {
             template : "#step2",
-           // props: ['plans']
+            props: ['plans']
         };
 
         const pay = {
-            template : "#step3",
-            props: ['message']
+            template : "#step3"
         };
 
         const vueRouter = new VueRouter({
             routes: [
                 { path:"/", component:index, props:{plans:plans} },
-                { path:"/:id", component:tarif },
-                { path:"/:id/pay", component:pay,  props: {message:'Пари',default:true} }
+                { path:"/:id", component:tarif, props: {plans:plans}  },
+                { path:"/:id/:i", component:pay }
             ]
         });
 
 	    app = new Vue({
 		    el:"#app",
-            router: vueRouter ,
-	        data: {plans}
+            router: vueRouter
         })
 
     });
