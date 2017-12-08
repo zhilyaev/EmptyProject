@@ -19,7 +19,7 @@
 	<h1><a href="#/"><i class="material-icons">settings_input_antenna</i> SkyNet: Тарифы</a></h1>
 	<hr>
 	<?php
-	/* Да это действительно единственный скрипт ((( */
+	/* Да это действительно единственный скрипт на PHP ((( */
 	$file = "api/data.json";
 	if(!file_exists($file)){
 		$json = file_get_contents('http://sknt.ru/job/frontend/data.json');
@@ -58,8 +58,6 @@
         </div>
     </div>
 </footer>
-<!-- следует убрать так как используетья только функция getJSON() -->
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <!-- Ротуинг -->
 <script src="https://unpkg.com/vue/dist/vue.min.js"></script>
 <script src="https://unpkg.com/vue-router/dist/vue-router.min.js"></script>
@@ -147,6 +145,25 @@
 	</section>
 </script>
 <script>
+    function getJSON(path, success, error)
+    {
+        let xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function()
+        {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    if (success)
+                        success(JSON.parse(xhr.responseText));
+                } else {
+                    if (error)
+                        error(xhr);
+                }
+            }
+        };
+        xhr.open("GET", path, true);
+        xhr.send();
+    }
+
     Date.prototype.ddmmyyyy = function (literal) {
         literal = (literal===undefined) ? '.' : literal;
         let mm = this.getMonth() + 1; // getMonth() is zero-based
@@ -160,7 +177,7 @@
     };
 
 	/* smth like func main */
-    $.getJSON( "api/data.json", function( json ) {
+    getJSON( "api/data.json", function( json ) {
 	    let plans = json.tarifs;
         const index = {
             template : "#step1",
