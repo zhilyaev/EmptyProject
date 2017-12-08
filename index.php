@@ -23,18 +23,20 @@
 	if(!file_exists($file)){
 		$json = file_get_contents('http://sknt.ru/job/frontend/data.json');
 		$custom = json_decode($json);
-		// Custom moneyRange property
+		// Change the directory to take a min, mix in 1 step
+		$tmp = $custom->tarifs[0]->tarifs[0];
+		$custom->tarifs[0]->tarifs[0] = $custom->tarifs[0]->tarifs[1];
+		$custom->tarifs[0]->tarifs[1] = $tmp;
+		unset($tmp);
+		// Custom  property : {moneyRange , discount}
 		foreach ($custom->tarifs as $plan){
-			$min = 5000; // Ну вы звери будете если выше поднимете (цены)
-			$max = 0;
-			// JSON файл не однородный (Земля
-			// поэтому придется искать
-			foreach ($plan->tarifs as $v){
-				$range = $v->price / $v->pay_period;
-				$max = ($range > $max) ? $range : $max;
-				$min = ($range < $min) ? $range : $min;
-			}
+			$max = $plan->tarifs[0]->price;
+			$l = sizeof($plan->tarifs)-1;
+			$min = $plan->tarifs[$l]->price / $plan->tarifs[$l]->pay_period;
 			$plan->moneyRange = $min." - ".$max;
+			foreach ($plan->tarifs as $v){
+				$v->discount = ($max - ($v->price / $v->pay_period)) * $v->pay_period;
+			}
 		}
 		file_put_contents($file, json_encode($custom));
 	}
@@ -95,7 +97,7 @@
 					<ul class="list-group list-group-flush">
 						<li class="list-group-item"><b>-{{ plan.price / plan.pay_period }} ₽/мес</b></li>
 						<li class="list-group-item">Разовый платеж — <b> {{ plan.price }} ₽</b></li>
-						<li class="list-group-item">Скидка —  <b> {{ plan.price }} ₽</b></li>
+						<li v-if="plan.discount>0" class="list-group-item">Скидка —  <b> {{ plan.discount }} ₽</b></li>
 					</ul>
 					<a :href="'#/'+$route.params.id+'/'+index" class="btn btn-outline-primary">
 						<i class="material-icons">play_arrow</i>
@@ -107,11 +109,27 @@
 </script>
 <!-- STEP 3 -->
 <script type="text/x-template" id="step3">
-	<h1>Шаг3</h1>
+	<section>
+		<h2 class="text-center">Выбор тарифа</h2>
+		<div class="row justify-content-center d-flex">
+			<div class="col col-12 col-sm-12 col-md-6 col-lg-4">
+				<div class="card">
+					<h4 class="card-header">{{plan.title}}</h4>
+					<ul class="list-group list-group-flush">
+						<li class="list-group-item"><b>-{{ plan.price / plan.pay_period }} ₽/мес</b></li>
+						<li class="list-group-item">Разовый платеж — <b> {{ plan.price }} ₽</b></li>
+						<li v-if="plan.discount>0" class="list-group-item">Скидка — <b> {{ plan.discount }} ₽</b></li>
+					</ul>
+					<a href="#" class="btn btn-outline-primary">
+						<i class="material-icons">shopping_cart</i>
+					</a>
+				</div>
+			</div>
+		</div>
+	</section>
 </script>
 <script>
 	/* smth like func main */
-    let app; // Для управления из консоли
     $.getJSON( "api/data.json", function( json ) {
 	    let plans = json.tarifs;
         const index = {
@@ -119,24 +137,29 @@
             props: ['plans']
         };
 
-        const tarif = {
+        const step2 = {
             template : "#step2",
             props: ['plans']
         };
 
-        const pay = {
-            template : "#step3"
+        const step3 = {
+            template : "#step3",
+            props: ['plan']
         };
 
         const vueRouter = new VueRouter({
             routes: [
                 { path:"/", component:index, props:{plans:plans} },
-                { path:"/:id", component:tarif, props: {plans:plans}  },
-                { path:"/:id/:i", component:pay }
+                { path:"/:id", component:step2, props: {plans:plans}  },
+                {
+                    path:"/:id/:i",
+	                component:step3,
+	                props: (route) => ({ plan: plans[route.params.id].tarifs[route.params.i] })
+                }
             ]
         });
 
-	    app = new Vue({
+	    const = app = new Vue({
 		    el:"#app",
             router: vueRouter
         })
