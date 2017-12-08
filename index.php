@@ -9,16 +9,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<link rel="icon" href="favicon/favicon.ico">
     <!-- CSS -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"><!-- Мои любимые иконки -->
     <link rel="stylesheet" href="css/bootstrap.css">
     <link rel="stylesheet" href="css/my.css">
 </head>
 <body>
 <br>
 <header class="container">
-	<h1>SkyNet Тарифы</h1>
+	<h1><a href="#/"><i class="material-icons">settings_input_antenna</i> SkyNet: Тарифы</a></h1>
 	<hr>
 	<?php
+	/* Да это действительно единственный скрипт ((( */
 	$file = "api/data.json";
 	if(!file_exists($file)){
 		$json = file_get_contents('http://sknt.ru/job/frontend/data.json');
@@ -34,6 +35,7 @@
 			$l = sizeof($plan->tarifs)-1;
 			$min = $plan->tarifs[$l]->price / $plan->tarifs[$l]->pay_period;
 			$plan->moneyRange = $min." - ".$max;
+			unset($min,$l);
 			foreach ($plan->tarifs as $v){
 				$v->discount = ($max - ($v->price / $v->pay_period)) * $v->pay_period;
 			}
@@ -51,15 +53,17 @@
         <i class="material-icons" style="font-size: 100px;">code</i>
         <div>
             <br>
-            <h5>© 2017. All rights reserved</h5>
+            <h5>© 2017. I am ok, thanks!</h5>
             <iframe align="center" class="justify-content-center" src="https://ghbtns.com/github-btn.html?user=zhilyaev&type=follow&size=large" frameborder="0" scrolling="0" width="177px" height="30px"></iframe>
         </div>
     </div>
 </footer>
+<!-- следует убрать так как используетья только функция getJSON() -->
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-<script src="https://unpkg.com/vue"></script>
-<script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
-<!-- STEP 1 -->
+<!-- Ротуинг -->
+<script src="https://unpkg.com/vue/dist/vue.min.js"></script>
+<script src="https://unpkg.com/vue-router/dist/vue-router.min.js"></script>
+<!-- TEMPLATE STEP 1 -->
 <script type="text/x-template" id="step1">
 	<div class="row justify-content-center d-flex">
 		<div v-for="(plan, index) in plans" style="width: 100% !important;" class="align-content-stretch d-flex col col-12 col-sm-12 col-md-6 col-lg-4">
@@ -86,11 +90,11 @@
 		</div>
 	</div>
 </script>
-<!-- STEP 2 -->
+<!-- TEMPLATE STEP 2 -->
 <script type="text/x-template" id="step2">
 	<section>
 		<h2 class="text-center">
-			<button onclick="history.back();" class="btn btn-outline-secondary">
+			<button onclick="history.back();" class="btn float-left btn-outline-secondary">
 				<i class="material-icons">keyboard_arrow_left</i>
 			</button>
 			{{plans[$route.params.id].title}}
@@ -112,11 +116,11 @@
 		</div>
 	</section>
 </script>
-<!-- STEP 3 -->
+<!-- TEMPLATE STEP 3 -->
 <script type="text/x-template" id="step3">
 	<section>
 		<h2 class="text-center">
-			<button onclick="history.back();" class="btn btn-outline-secondary">
+			<button onclick="history.back();" class="btn float-left btn-outline-secondary">
 				<i class="material-icons">keyboard_arrow_left</i>
 			</button>
 			Выбор тарифа
